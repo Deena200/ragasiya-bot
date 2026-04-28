@@ -245,7 +245,7 @@ job_queue = app.job_queue
 job_queue.run_daily(send_morning, time=time(7, 0, tzinfo=IST))
 job_queue.run_daily(send_afternoon, time=time(13, 0, tzinfo=IST))
 job_queue.run_daily(send_evening, time=time(16, 0, tzinfo=IST))
-job_queue.run_daily(send_night, time=time(19, 11, tzinfo=IST))
+job_queue.run_daily(send_night, time=time(19, 13, tzinfo=IST))
 job_queue.run_daily(send_midnight, time=time(0, 0, tzinfo=IST))
 
 
