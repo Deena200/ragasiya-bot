@@ -207,20 +207,45 @@ async def send_night(context):
 async def send_midnight(context):
     await context.bot.send_message(chat_id=GROUP_ID, text=random.choice(midnight_msgs))
 # =========================
-# 3. LEAVE MESSAGE
+# 3. GOODBYE MESSAGE (Leave / Removed / Banned)
 # =========================
+
 async def member_update(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    result = update.chat_member
+    chat_member = update.chat_member
 
-    if result.old_chat_member.status != "left" and result.new_chat_member.status == "left":
-        user = result.new_chat_member.user
-        name = f"<a href='tg://user?id={user.id}'>{user.first_name}</a>"
+    old_status = chat_member.old_chat_member.status
+    new_status = chat_member.new_chat_member.status
 
-        await context.bot.send_message(
-            chat_id=update.effective_chat.id,
-            text=f"👋 {name} left the group",
-            parse_mode="HTML"
+    user = chat_member.new_chat_member.user
+    name = f"<a href='tg://user?id={user.id}'>{user.first_name}</a>"
+
+    # User left voluntarily
+    if old_status in ["member", "administrator", "restricted"] and new_status == "left":
+        msg = (
+            f"👋 {name} குழுவை விட்டு வெளியேறினார்\n\n"
+            f"🌸 இனிய பயணம் அமையட்டும்\n"
+            f"😊 நல்ல நினைவுகளுடன் செல்லுங்கள்\n"
+            f"✨ மீண்டும் வர விரும்பினால் எப்போதும் வரலாம்\n"
+            f"💫 வாழ்த்துகள்!"
         )
+
+    # User removed / kicked / banned by admin
+    elif old_status in ["member", "administrator", "restricted"] and new_status == "kicked":
+        msg = (
+            f"🚫 {name} குழுவிலிருந்து நீக்கப்பட்டார்\n\n"
+            f"🌸 வாழ்க்கை நல்ல பாதையில் செல்லட்டும்\n"
+            f"✨ எல்லாம் நன்றாக அமையட்டும்\n"
+            f"💫 இனிய வாழ்த்துகள்!"
+        )
+
+    else:
+        return
+
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text=msg,
+        parse_mode="HTML"
+    )
 
 
 # =========================
@@ -231,8 +256,10 @@ app = ApplicationBuilder().token(TOKEN).build()
 # Admin trigger
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, admin_reply))
 
-# Leave detection
-app.add_handler(ChatMemberHandler(member_update, ChatMemberHandler.CHAT_MEMBER))
+# Goodbye detection
+app.add_handler(
+    ChatMemberHandler(member_update, ChatMemberHandler.CHAT_MEMBER)
+)
 
 # Scheduler
 from datetime import time
