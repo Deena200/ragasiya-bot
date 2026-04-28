@@ -210,43 +210,21 @@ async def send_midnight(context):
 # 3. GOODBYE MESSAGE (Leave / Removed / Banned)
 # =========================
 
-async def member_update(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    chat_member = update.chat_member
-
-    old_status = chat_member.old_chat_member.status
-    new_status = chat_member.new_chat_member.status
-
-    user = chat_member.new_chat_member.user
+async def left_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.message.left_chat_member
     name = f"<a href='tg://user?id={user.id}'>{user.first_name}</a>"
 
-    # User left voluntarily
-    if old_status in ["member", "administrator", "restricted"] and new_status == "left":
-        msg = (
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text=(
             f"👋 {name} குழுவை விட்டு வெளியேறினார்\n\n"
             f"🌸 இனிய பயணம் அமையட்டும்\n"
             f"😊 நல்ல நினைவுகளுடன் செல்லுங்கள்\n"
             f"✨ மீண்டும் வர விரும்பினால் எப்போதும் வரலாம்\n"
             f"💫 வாழ்த்துகள்!"
-        )
-
-    # User removed / kicked / banned by admin
-    elif old_status in ["member", "administrator", "restricted"] and new_status == "kicked":
-        msg = (
-            f"🚫 {name} குழுவிலிருந்து நீக்கப்பட்டார்\n\n"
-            f"🌸 வாழ்க்கை நல்ல பாதையில் செல்லட்டும்\n"
-            f"✨ எல்லாம் நன்றாக அமையட்டும்\n"
-            f"💫 இனிய வாழ்த்துகள்!"
-        )
-
-    else:
-        return
-
-    await context.bot.send_message(
-        chat_id=update.effective_chat.id,
-        text=msg,
+        ),
         parse_mode="HTML"
     )
-
 
 # =========================
 # MAIN
@@ -258,7 +236,7 @@ app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, admin_reply))
 
 # Goodbye detection
 app.add_handler(
-    ChatMemberHandler(member_update, ChatMemberHandler.CHAT_MEMBER)
+    MessageHandler(filters.StatusUpdate.LEFT_CHAT_MEMBER, left_message)
 )
 
 # Scheduler
