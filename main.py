@@ -15,7 +15,7 @@ from telegram.ext import (
 # CONFIG
 # =========================
 
-TOKEN = 8798668728:AAEJj1Pdxw3ZZv78X-mwHDvFTb4Mz3PGO0M
+TOKEN = "8798668728:AAEJj1Pdxw3ZZv78X-mwHDvFTb4Mz3PGO0M"
 GROUP_ID = -1003573621688
 
 
